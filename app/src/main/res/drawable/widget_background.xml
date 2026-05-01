@@ -12,10 +12,13 @@
         </shape>
     </item>
     <!-- Subtle top-edge glass sheen -->
-    <item android:bottom="60%">
+    <item>
         <shape android:shape="rectangle">
             <corners android:radius="24dp" />
-            <solid android:color="#08FFFFFF" />
+            <gradient
+                android:angle="270"
+                android:endColor="#00FFFFFF"
+                android:startColor="#08FFFFFF" />
         </shape>
     </item>
     <!-- 1dp white border -->
