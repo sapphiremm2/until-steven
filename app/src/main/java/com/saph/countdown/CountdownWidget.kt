@@ -45,9 +45,21 @@ class CountdownWidget : AppWidgetProvider() {
 
     companion object {
         const val ACTION_UPDATE = "com.saph.countdown.ACTION_UPDATE"
+        const val PREFS_NAME = "com.saph.countdown.widget_prefs"
+        const val KEY_LABEL = "label"
+        const val DEFAULT_LABEL = "until wednesday"
 
         private val TARGET_TIME = LocalTime.of(18, 30)
         private val WINDOW_END = LocalTime.of(21, 0)
+
+        fun getLabel(context: Context): String =
+            context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                .getString(KEY_LABEL, DEFAULT_LABEL) ?: DEFAULT_LABEL
+
+        fun setLabel(context: Context, label: String) {
+            context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                .edit().putString(KEY_LABEL, label.trim().ifEmpty { DEFAULT_LABEL }).apply()
+        }
 
         fun updateAppWidget(
             context: Context,
@@ -56,6 +68,8 @@ class CountdownWidget : AppWidgetProvider() {
         ) {
             val views = RemoteViews(context.packageName, R.layout.widget_layout)
             val now = LocalDateTime.now()
+
+            views.setTextViewText(R.id.tv_label, getLabel(context))
 
             when (val target = getTarget(now)) {
                 null -> {
