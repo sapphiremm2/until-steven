@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Background card -->
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="24dp" />
+            <gradient
+                android:angle="135"
+                android:endColor="#C5080808"
+                android:startColor="#D0121212"
+                android:type="linear" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="24dp" />
+            <stroke android:width="1dp" android:color="#22FFFFFF" />
+        </shape>
+    </item>
+    <!-- Faux number block — days -->
+    <item android:bottom="44dp" android:left="24dp" android:right="196dp" android:top="20dp">
+        <shape android:shape="rectangle">
+            <corners android:radius="4dp" />
+            <solid android:color="#55FFFFFF" />
+        </shape>
+    </item>
+    <!-- Faux number block — hours -->
+    <item android:bottom="44dp" android:left="110dp" android:right="110dp" android:top="20dp">
+        <shape android:shape="rectangle">
+            <corners android:radius="4dp" />
+            <solid android:color="#55FFFFFF" />
+        </shape>
+    </item>
+    <!-- Faux number block — minutes -->
+    <item android:bottom="44dp" android:left="196dp" android:right="24dp" android:top="20dp">
+        <shape android:shape="rectangle">
+            <corners android:radius="4dp" />
+            <solid android:color="#55FFFFFF" />
+        </shape>
+    </item>
+    <!-- Faux subtitle bar -->
+    <item android:bottom="12dp" android:left="72dp" android:right="72dp" android:top="74dp">
+        <shape android:shape="rectangle">
+            <corners android:radius="2dp" />
+            <solid android:color="#22FFFFFF" />
+        </shape>
+    </item>
+</layer-list>

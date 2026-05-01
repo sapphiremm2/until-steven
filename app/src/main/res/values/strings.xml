@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">until wednesday</string>
+    <string name="widget_description">Countdown to next Wednesday at 6:30 PM</string>
+</resources>
