@@ -14,8 +14,8 @@
     <group
         android:pivotX="438.19"
         android:pivotY="439.52"
-        android:scaleX="0.5625"
-        android:scaleY="0.5625">
+        android:scaleX="0.39375"
+        android:scaleY="0.39375">
 
     <path
         android:fillColor="#FFFFFF"
