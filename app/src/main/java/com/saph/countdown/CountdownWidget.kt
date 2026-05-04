@@ -33,12 +33,18 @@ class CountdownWidget : AppWidgetProvider() {
 
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
-        if (intent.action == ACTION_UPDATE || intent.action == Intent.ACTION_BOOT_COMPLETED) {
-            val manager = AppWidgetManager.getInstance(context)
-            val ids = manager.getAppWidgetIds(ComponentName(context, CountdownWidget::class.java))
-            if (ids.isNotEmpty()) {
-                ids.forEach { updateAppWidget(context, manager, it) }
-                scheduleNextUpdate(context)
+        when (intent.action) {
+            ACTION_UPDATE,
+            Intent.ACTION_BOOT_COMPLETED,
+            Intent.ACTION_USER_PRESENT,   // screen unlocked — guaranteed to fire on Samsung
+            Intent.ACTION_TIME_CHANGED,
+            Intent.ACTION_TIMEZONE_CHANGED -> {
+                val manager = AppWidgetManager.getInstance(context)
+                val ids = manager.getAppWidgetIds(ComponentName(context, CountdownWidget::class.java))
+                if (ids.isNotEmpty()) {
+                    ids.forEach { updateAppWidget(context, manager, it) }
+                    scheduleNextUpdate(context)
+                }
             }
         }
     }

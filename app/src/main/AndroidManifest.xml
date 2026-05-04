@@ -28,7 +28,9 @@
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
                 <action android:name="com.saph.countdown.ACTION_UPDATE" />
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+                <action android:name="android.intent.action.USER_PRESENT" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"

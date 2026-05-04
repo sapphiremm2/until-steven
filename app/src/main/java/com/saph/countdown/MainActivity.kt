@@ -208,10 +208,11 @@ class MainActivity : AppCompatActivity() {
         val newLabel = editLabel.text.toString().trim().ifEmpty { CountdownWidget.DEFAULT_LABEL }
         CountdownWidget.setLabel(this, newLabel)
 
-        // Push update to all active widget instances
+        // Push update to all active widget instances and restart alarm chain
         val manager = AppWidgetManager.getInstance(this)
         val ids = manager.getAppWidgetIds(ComponentName(this, CountdownWidget::class.java))
         ids.forEach { CountdownWidget.updateAppWidget(this, manager, it) }
+        CountdownWidget.scheduleNextUpdate(this)
 
         // Dismiss keyboard
         val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
