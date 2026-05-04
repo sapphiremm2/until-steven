@@ -5,32 +5,60 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- Outer Ring -->
+    <!--
+        Layers (order matters):
+        1. Full arrow shaft in white — parts outside the heart will stay visible
+        2. White filled heart drawn on top — covers the shaft inside the heart
+        3. Dark slit re-drawn through the heart — creates the "pierced" effect
+        4. Arrowhead triangle at the tip (upper-right)
+        5. Fletching vanes at the tail (lower-left)
+    -->
+
+    <!-- 1. Arrow shaft — full diagonal, white -->
     <path
         android:fillColor="#00000000"
-        android:pathData="M54,24 A30,30 0 1,1 53.9,24"
-        android:strokeWidth="4"
-        android:strokeColor="#33FFFFFF" />
+        android:pathData="M20,88 L88,20"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeLineCap="round"
+        android:strokeWidth="4.5" />
 
-    <!-- Active Progress -->
+    <!-- 2. Heart fill — white, drawn over the shaft so the interior is clean -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="
+            M54,70
+            C32,56 20,42 20,32
+            C20,22 28,18 38,21
+            C44,23 50,28 54,36
+            C58,28 64,23 70,21
+            C80,18 88,22 88,32
+            C88,42 76,56 54,70 Z" />
+
+    <!-- 3. Dark slit through the heart — the arrow "cutting through" -->
     <path
         android:fillColor="#00000000"
-        android:pathData="M54,24 A30,30 0 1,1 30,75"
-        android:strokeWidth="4"
-        android:strokeColor="#FFFFFF"
-        android:strokeLineCap="round" />
+        android:pathData="M42,66 L75,33"
+        android:strokeColor="#111111"
+        android:strokeLineCap="round"
+        android:strokeWidth="4.5" />
 
-    <!-- Center Dot -->
+    <!-- 4. Arrowhead — white triangle, tip at upper-right outside the heart -->
     <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M54,54 m-3,0 a3,3 0 1,1 6,0 a3,3 0 1,1 -6,0" />
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M91,17 L80,23 L86,30 Z" />
 
-    <!-- Needle -->
+    <!-- 5. Fletching — two vanes spreading from the tail at lower-left -->
     <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M54,54 L54,34"
-        android:strokeWidth="3"
-        android:strokeColor="#FFFFFF"
-        android:strokeLineCap="round" />
+        android:fillColor="#00000000"
+        android:pathData="M20,88 L12,79"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeLineCap="round"
+        android:strokeWidth="3.5" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M20,88 L13,96"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeLineCap="round"
+        android:strokeWidth="3.5" />
 
 </vector>
