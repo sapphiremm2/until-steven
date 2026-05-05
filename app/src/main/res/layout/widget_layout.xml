@@ -125,16 +125,34 @@
 
     </LinearLayout>
 
-    <!-- Heart — shown during the event window -->
-    <TextView
-        android:id="@+id/tv_now"
+    <!-- Icon + label — shown during the event window -->
+    <LinearLayout
+        android:id="@+id/now_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:fontFamily="sans-serif-light"
-        android:text="♡"
-        android:textColor="#CCFFFFFF"
-        android:textSize="48sp"
-        android:visibility="gone" />
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/iv_now_icon"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:src="@mipmap/ic_launcher_round"
+            android:scaleType="fitCenter" />
+
+        <TextView
+            android:id="@+id/tv_now_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:fontFamily="sans-serif-light"
+            android:letterSpacing="0.12"
+            android:text="here"
+            android:textColor="#CCFFFFFF"
+            android:textSize="14sp" />
+
+    </LinearLayout>
 
     <!-- Subtitle -->
     <TextView

@@ -61,9 +61,11 @@ class CountdownWidget : AppWidgetProvider() {
         const val KEY_TARGET_DAY  = "target_day"         // DayOfWeek ordinal (1=MON … 7=SUN)
         const val KEY_TARGET_HOUR = "target_hour"
         const val KEY_TARGET_MIN  = "target_minute"
-        const val KEY_WINDOW_HOURS = "window_hours"      // hours the ♡ shows (default 2.5 → 150 min)
+        const val KEY_WINDOW_HOURS = "window_hours"      // hours the icon shows (default 2.5 → 150 min)
+        const val KEY_NOW_LABEL   = "now_label"          // text shown under icon during event window
 
-        const val DEFAULT_LABEL   = "until wednesday"
+        const val DEFAULT_LABEL     = "until wednesday"
+        const val DEFAULT_NOW_LABEL = "here"
         const val DEFAULT_INTERVAL = 15
         const val DEFAULT_THEME   = "dark"
         const val DEFAULT_DAY     = 3   // Wednesday
@@ -121,6 +123,12 @@ class CountdownWidget : AppWidgetProvider() {
         fun setTargetMinute(ctx: Context, m: Int) =
             prefs(ctx).edit().putInt(KEY_TARGET_MIN, m).apply()
 
+        fun getNowLabel(ctx: Context): String =
+            prefs(ctx).getString(KEY_NOW_LABEL, DEFAULT_NOW_LABEL) ?: DEFAULT_NOW_LABEL
+
+        fun setNowLabel(ctx: Context, v: String) =
+            prefs(ctx).edit().putString(KEY_NOW_LABEL, v.trim().ifEmpty { DEFAULT_NOW_LABEL }).apply()
+
         private fun prefs(ctx: Context) =
             ctx.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
@@ -148,7 +156,8 @@ class CountdownWidget : AppWidgetProvider() {
             when (val target = getTarget(context, now)) {
                 null -> {
                     views.setViewVisibility(R.id.countdown_container, View.GONE)
-                    views.setViewVisibility(R.id.tv_now, View.VISIBLE)
+                    views.setViewVisibility(R.id.now_container, View.VISIBLE)
+                    views.setTextViewText(R.id.tv_now_label, getNowLabel(context))
                 }
                 else -> {
                     val total   = Duration.between(now, target).toMinutes().coerceAtLeast(0)
@@ -157,7 +166,7 @@ class CountdownWidget : AppWidgetProvider() {
                     val minutes = total % 60
 
                     views.setViewVisibility(R.id.countdown_container, View.VISIBLE)
-                    views.setViewVisibility(R.id.tv_now, View.GONE)
+                    views.setViewVisibility(R.id.now_container, View.GONE)
                     views.setTextViewText(R.id.tv_days,    "%02d".format(days))
                     views.setTextViewText(R.id.tv_hours,   "%02d".format(hours))
                     views.setTextViewText(R.id.tv_minutes, "%02d".format(minutes))
@@ -182,7 +191,7 @@ class CountdownWidget : AppWidgetProvider() {
                     views.setTextColor(R.id.tv_unit_minutes,dim)
                     views.setTextColor(R.id.tv_sep_1,       med)
                     views.setTextColor(R.id.separator_hm,   med)
-                    views.setTextColor(R.id.tv_now,         dark)
+                    views.setTextColor(R.id.tv_now_label,   dark)
                     views.setTextColor(R.id.tv_label,       dim)
                 }
                 "clear" -> {
@@ -213,7 +222,7 @@ class CountdownWidget : AppWidgetProvider() {
             views.setTextColor(R.id.tv_unit_minutes, 0x55FFFFFF.toInt())
             views.setTextColor(R.id.tv_sep_1,        0x33FFFFFF.toInt())
             views.setTextColor(R.id.separator_hm,    0x33FFFFFF.toInt())
-            views.setTextColor(R.id.tv_now,          0xCCFFFFFF.toInt())
+            views.setTextColor(R.id.tv_now_label,    0xCCFFFFFF.toInt())
             views.setTextColor(R.id.tv_label,        0x33FFFFFF.toInt())
         }
 

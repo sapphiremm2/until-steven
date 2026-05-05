@@ -24,6 +24,7 @@ import java.util.Locale
 class MainActivity : AppCompatActivity() {
 
     private lateinit var editLabel: EditText
+    private lateinit var editNowLabel: EditText
     private lateinit var previewDisplay: TextView
     private lateinit var previewLabelView: TextView
 
@@ -125,6 +126,28 @@ class MainActivity : AppCompatActivity() {
             )
         }
         root.addView(editLabel)
+
+        root.addView(space(20))
+
+        // ── "Now" label (shown under icon during event window) ─────────────────────
+        root.addView(sectionLabel("label when you're together"))
+        editNowLabel = EditText(this).apply {
+            hint = CountdownWidget.DEFAULT_NOW_LABEL
+            setHintTextColor(0x33FFFFFF)
+            setTextColor(0xFFFFFFFF.toInt())
+            textSize = 16f
+            typeface = Typeface.create("sans-serif-light", Typeface.NORMAL)
+            setBackgroundColor(0xFF1A1A1A.toInt())
+            setPadding(20, 16, 20, 16)
+            filters = arrayOf(InputFilter.LengthFilter(32))
+            maxLines = 1
+            imeOptions = EditorInfo.IME_ACTION_DONE
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        }
+        root.addView(editNowLabel)
 
         root.addView(space(32))
 
@@ -297,6 +320,7 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         editLabel.setText(CountdownWidget.getLabel(this))
+        editNowLabel.setText(CountdownWidget.getNowLabel(this))
         updatePreviewDisplay()
     }
 
@@ -395,6 +419,8 @@ class MainActivity : AppCompatActivity() {
     private fun saveAll() {
         val newLabel = editLabel.text.toString().trim().ifEmpty { CountdownWidget.DEFAULT_LABEL }
         CountdownWidget.setLabel(this, newLabel)
+        val nowLabel = editNowLabel.text.toString().trim().ifEmpty { CountdownWidget.DEFAULT_NOW_LABEL }
+        CountdownWidget.setNowLabel(this, nowLabel)
 
         val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(editLabel.windowToken, 0)
