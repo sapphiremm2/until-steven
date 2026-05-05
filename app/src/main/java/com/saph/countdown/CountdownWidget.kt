@@ -1,20 +1,16 @@
 package com.saph.countdown
 
-import android.app.AlarmManager
-import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.view.View
 import android.widget.RemoteViews
 import java.time.DayOfWeek
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.LocalTime
-import java.util.Calendar
 
 class CountdownWidget : AppWidgetProvider() {
 
@@ -23,49 +19,31 @@ class CountdownWidget : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray
     ) {
+        // Called when widget is first added or on system request — just refresh content.
+        // No alarm scheduled; updates happen on screen unlock via USER_PRESENT.
         appWidgetIds.forEach { updateAppWidget(context, appWidgetManager, it) }
-        scheduleNextUpdate(context)
-    }
-
-    override fun onDisabled(context: Context) {
-        cancelUpdate(context)
     }
 
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
         when (intent.action) {
-            ACTION_UPDATE,
+            // Screen unlocked — the only time the widget is actually visible
+            Intent.ACTION_USER_PRESENT,
+            // Keep these so the time stays correct after reboot / DST / travel
             Intent.ACTION_BOOT_COMPLETED,
-            Intent.ACTION_USER_PRESENT,   // screen unlocked — guaranteed to fire on Samsung
             Intent.ACTION_TIME_CHANGED,
             Intent.ACTION_TIMEZONE_CHANGED -> {
                 val manager = AppWidgetManager.getInstance(context)
                 val ids = manager.getAppWidgetIds(ComponentName(context, CountdownWidget::class.java))
-                if (ids.isNotEmpty()) {
-                    ids.forEach { updateAppWidget(context, manager, it) }
-                    scheduleNextUpdate(context)
-                }
+                if (ids.isNotEmpty()) ids.forEach { updateAppWidget(context, manager, it) }
             }
         }
     }
 
     companion object {
-        const val ACTION_UPDATE = "com.saph.countdown.ACTION_UPDATE"
         const val PREFS_NAME = "com.saph.countdown.widget_prefs"
         const val KEY_LABEL = "label"
         const val DEFAULT_LABEL = "until wednesday"
-        const val KEY_INTERVAL = "interval_minutes"
-        const val DEFAULT_INTERVAL = 5
-        val VALID_INTERVALS = listOf(1, 5, 30)
-
-        fun getInterval(context: Context): Int =
-            context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-                .getInt(KEY_INTERVAL, DEFAULT_INTERVAL)
-
-        fun setInterval(context: Context, minutes: Int) {
-            context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-                .edit().putInt(KEY_INTERVAL, minutes).apply()
-        }
 
         private val TARGET_TIME = LocalTime.of(18, 30)
         private val WINDOW_END = LocalTime.of(21, 0)
@@ -126,38 +104,5 @@ class CountdownWidget : AppWidgetProvider() {
             return now.toLocalDate().plusDays(daysUntil.toLong()).atTime(TARGET_TIME)
         }
 
-        fun scheduleNextUpdate(context: Context) {
-            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            val intent = Intent(context, CountdownWidget::class.java).apply {
-                action = ACTION_UPDATE
-            }
-            val pendingIntent = PendingIntent.getBroadcast(
-                context, 0, intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-            // Snap to the next clean interval boundary.
-            // e.g. interval=5 at 3:07 → fires at 3:10; interval=30 at 3:31 → fires at 4:00
-            val intervalMs = getInterval(context) * 60_000L
-            val nowMs = System.currentTimeMillis()
-            val nextFire = ((nowMs / intervalMs) + 1) * intervalMs
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarmManager.canScheduleExactAlarms()) {
-                alarmManager.set(AlarmManager.RTC, nextFire, pendingIntent)
-            } else {
-                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC, nextFire, pendingIntent)
-            }
-        }
-
-        fun cancelUpdate(context: Context) {
-            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            val intent = Intent(context, CountdownWidget::class.java).apply {
-                action = ACTION_UPDATE
-            }
-            val pendingIntent = PendingIntent.getBroadcast(
-                context, 0, intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-            alarmManager.cancel(pendingIntent)
-        }
     }
 }
