@@ -157,6 +157,7 @@ class MainActivity : AppCompatActivity() {
         val manager = AppWidgetManager.getInstance(this)
         val ids = manager.getAppWidgetIds(ComponentName(this, CountdownWidget::class.java))
         ids.forEach { CountdownWidget.updateAppWidget(this, manager, it) }
+        CountdownWidget.scheduleNextUpdate(this)
 
         val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(editLabel.windowToken, 0)
