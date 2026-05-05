@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/widget_background"
@@ -7,7 +8,7 @@
     android:orientation="vertical"
     android:padding="4dp">
 
-    <!-- Countdown numbers — shown when counting down -->
+    <!-- Countdown row — visible while counting down -->
     <LinearLayout
         android:id="@+id/countdown_container"
         android:layout_width="match_parent"
@@ -35,6 +36,7 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/tv_unit_days"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="days"
@@ -42,8 +44,8 @@
                 android:textSize="9sp" />
         </LinearLayout>
 
-        <!-- Separator -->
         <TextView
+            android:id="@+id/tv_sep_1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
@@ -73,6 +75,7 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/tv_unit_hours"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="hrs"
@@ -80,8 +83,9 @@
                 android:textSize="9sp" />
         </LinearLayout>
 
-        <!-- Separator -->
+        <!-- Separator + minutes col — hidden when interval = 1h -->
         <TextView
+            android:id="@+id/separator_hm"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
@@ -91,8 +95,8 @@
             android:textSize="36sp"
             android:textStyle="bold" />
 
-        <!-- Minutes -->
         <LinearLayout
+            android:id="@+id/minutes_col"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -111,6 +115,7 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/tv_unit_minutes"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="min"
@@ -120,7 +125,7 @@
 
     </LinearLayout>
 
-    <!-- Heart — shown during 6:30–9:00 PM Wednesday window -->
+    <!-- Heart — shown during the event window -->
     <TextView
         android:id="@+id/tv_now"
         android:layout_width="wrap_content"
@@ -131,7 +136,7 @@
         android:textSize="48sp"
         android:visibility="gone" />
 
-    <!-- Subtitle — always visible, text set dynamically from prefs -->
+    <!-- Subtitle -->
     <TextView
         android:id="@+id/tv_label"
         android:layout_width="wrap_content"
