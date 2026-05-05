@@ -24,7 +24,9 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var editLabel: EditText
     private lateinit var previewDisplay: TextView
+    private lateinit var previewLabelView: TextView
     private lateinit var permissionBanner: TextView
+    private val intervalButtons = mutableMapOf<Int, Button>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,11 +59,10 @@ class MainActivity : AppCompatActivity() {
             typeface = Typeface.create("sans-serif-condensed", Typeface.BOLD)
             setTextColor(0xFFFFFFFF.toInt())
             gravity = Gravity.CENTER
-            setBackgroundResource(0)
             setPadding(0, 28, 0, 4)
         }
 
-        val previewLabel = TextView(this).apply {
+        previewLabelView = TextView(this).apply {
             textSize = 10f
             typeface = Typeface.create("sans-serif-light", Typeface.NORMAL)
             setTextColor(0x44FFFFFF)
@@ -74,36 +75,22 @@ class MainActivity : AppCompatActivity() {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
             setBackgroundColor(0xFF111111.toInt())
-            // Round corners via outline — simple color bg for compatibility
-            elevation = 0f
-            setPadding(0, 0, 0, 0)
         }
         previewCard.addView(previewDisplay)
-        previewCard.addView(previewLabel)
+        previewCard.addView(previewLabelView)
 
         val cardWrapper = FrameLayout(this).apply {
-            val lp = LinearLayout.LayoutParams(
+            layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-            lp.bottomMargin = 40
-            layoutParams = lp
+            ).also { it.bottomMargin = 40 }
             setBackgroundColor(0xFF111111.toInt())
         }
         cardWrapper.addView(previewCard)
         root.addView(cardWrapper)
 
-        // Store reference to update label text from prefs
-        this.previewLabelView = previewLabel
-
         // ── Label editor ───────────────────────────────────────
-        root.addView(TextView(this).apply {
-            text = "widget label"
-            textSize = 11f
-            setTextColor(0x66FFFFFF)
-            letterSpacing = 0.1f
-            setPadding(4, 0, 0, 8)
-        })
+        root.addView(sectionLabel("widget label"))
 
         editLabel = EditText(this).apply {
             hint = CountdownWidget.DEFAULT_LABEL
@@ -116,17 +103,15 @@ class MainActivity : AppCompatActivity() {
             filters = arrayOf(InputFilter.LengthFilter(32))
             maxLines = 1
             imeOptions = EditorInfo.IME_ACTION_DONE
-            val lp = LinearLayout.LayoutParams(
+            layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             )
-            layoutParams = lp
         }
         root.addView(editLabel)
 
         root.addView(space(12))
 
-        // ── Save button ────────────────────────────────────────
         val saveBtn = Button(this).apply {
             text = "save & update widget"
             textSize = 12f
@@ -134,18 +119,62 @@ class MainActivity : AppCompatActivity() {
             setTextColor(0xFF000000.toInt())
             setBackgroundColor(0xFFFFFFFF.toInt())
             letterSpacing = 0.05f
-            val lp = LinearLayout.LayoutParams(
+            layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             )
-            layoutParams = lp
             setOnClickListener { saveLabel() }
         }
         root.addView(saveBtn)
 
+        root.addView(space(36))
+
+        // ── Update interval ────────────────────────────────────
+        root.addView(sectionLabel("update interval"))
+
+        val intervalRow = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        }
+
+        CountdownWidget.VALID_INTERVALS.forEachIndexed { index, minutes ->
+            val label = when (minutes) {
+                1 -> "1 min"
+                5 -> "5 min"
+                else -> "30 min"
+            }
+            val btn = Button(this).apply {
+                text = label
+                textSize = 12f
+                typeface = Typeface.create("sans-serif", Typeface.NORMAL)
+                letterSpacing = 0.03f
+                layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+                    .also { lp ->
+                        if (index > 0) lp.leftMargin = (2 * resources.displayMetrics.density).toInt()
+                    }
+                setOnClickListener { selectInterval(minutes) }
+            }
+            intervalButtons[minutes] = btn
+            intervalRow.addView(btn)
+        }
+
+        root.addView(intervalRow)
+
+        root.addView(space(8))
+
+        root.addView(TextView(this).apply {
+            text = "widget updates on screen unlock regardless of interval"
+            textSize = 10f
+            setTextColor(0x33FFFFFF)
+            gravity = Gravity.CENTER
+        })
+
         root.addView(space(40))
 
-        // ── Hint ───────────────────────────────────────────────
+        // ── Hints ──────────────────────────────────────────────
         root.addView(TextView(this).apply {
             text = "long-press home screen → widgets to add"
             textSize = 11f
@@ -153,8 +182,6 @@ class MainActivity : AppCompatActivity() {
             gravity = Gravity.CENTER
             setPadding(0, 0, 0, 8)
         })
-
-        // cover screen hint
         root.addView(TextView(this).apply {
             text = "cover screen: settings → cover screen → widgets"
             textSize = 11f
@@ -162,8 +189,6 @@ class MainActivity : AppCompatActivity() {
             gravity = Gravity.CENTER
             setPadding(0, 0, 0, 8)
         })
-
-        // lock screen hint
         root.addView(TextView(this).apply {
             text = "lock screen: settings → lock screen → edit lock screen → widgets"
             textSize = 11f
@@ -175,7 +200,7 @@ class MainActivity : AppCompatActivity() {
 
         // ── Exact alarm permission banner ──────────────────────
         permissionBanner = TextView(this).apply {
-            text = "⚠  tap to grant exact alarm permission\n(needed for per-minute updates)"
+            text = "⚠  tap to grant exact alarm permission\n(needed for accurate updates)"
             textSize = 11f
             setTextColor(0xFFFFCC00.toInt())
             gravity = Gravity.CENTER
@@ -194,27 +219,39 @@ class MainActivity : AppCompatActivity() {
         setContentView(scroll)
     }
 
-    // Held so onResume can update both the number display and label text
-    private lateinit var previewLabelView: TextView
-
     override fun onResume() {
         super.onResume()
         editLabel.setText(CountdownWidget.getLabel(this))
+        refreshIntervalButtons()
         updatePreviewDisplay()
         checkExactAlarmPermission()
+    }
+
+    private fun selectInterval(minutes: Int) {
+        CountdownWidget.setInterval(this, minutes)
+        CountdownWidget.scheduleNextUpdate(this)
+        refreshIntervalButtons()
+        Toast.makeText(this, "updating every ${if (minutes == 1) "minute" else "$minutes minutes"}", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun refreshIntervalButtons() {
+        val current = CountdownWidget.getInterval(this)
+        intervalButtons.forEach { (minutes, btn) ->
+            val selected = minutes == current
+            btn.setBackgroundColor(if (selected) 0xFFFFFFFF.toInt() else 0xFF1A1A1A.toInt())
+            btn.setTextColor(if (selected) 0xFF000000.toInt() else 0xAAFFFFFF.toInt())
+        }
     }
 
     private fun saveLabel() {
         val newLabel = editLabel.text.toString().trim().ifEmpty { CountdownWidget.DEFAULT_LABEL }
         CountdownWidget.setLabel(this, newLabel)
 
-        // Push update to all active widget instances and restart alarm chain
         val manager = AppWidgetManager.getInstance(this)
         val ids = manager.getAppWidgetIds(ComponentName(this, CountdownWidget::class.java))
         ids.forEach { CountdownWidget.updateAppWidget(this, manager, it) }
         CountdownWidget.scheduleNextUpdate(this)
 
-        // Dismiss keyboard
         val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(editLabel.windowToken, 0)
 
@@ -260,9 +297,18 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun sectionLabel(text: String) = TextView(this).apply {
+        this.text = text
+        textSize = 11f
+        setTextColor(0x66FFFFFF)
+        letterSpacing = 0.1f
+        setPadding(4, 0, 0, 8)
+    }
+
     private fun space(dp: Int) = android.view.View(this).apply {
         layoutParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT, (dp * resources.displayMetrics.density).toInt()
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            (dp * resources.displayMetrics.density).toInt()
         )
     }
 }

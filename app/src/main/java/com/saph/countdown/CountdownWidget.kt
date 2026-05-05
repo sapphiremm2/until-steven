@@ -54,6 +54,18 @@ class CountdownWidget : AppWidgetProvider() {
         const val PREFS_NAME = "com.saph.countdown.widget_prefs"
         const val KEY_LABEL = "label"
         const val DEFAULT_LABEL = "until wednesday"
+        const val KEY_INTERVAL = "interval_minutes"
+        const val DEFAULT_INTERVAL = 5
+        val VALID_INTERVALS = listOf(1, 5, 30)
+
+        fun getInterval(context: Context): Int =
+            context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                .getInt(KEY_INTERVAL, DEFAULT_INTERVAL)
+
+        fun setInterval(context: Context, minutes: Int) {
+            context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                .edit().putInt(KEY_INTERVAL, minutes).apply()
+        }
 
         private val TARGET_TIME = LocalTime.of(18, 30)
         private val WINDOW_END = LocalTime.of(21, 0)
@@ -123,18 +135,16 @@ class CountdownWidget : AppWidgetProvider() {
                 context, 0, intent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
-            // Fire at the top of the next minute
-            val nextMinute = Calendar.getInstance().apply {
-                add(Calendar.MINUTE, 1)
-                set(Calendar.SECOND, 0)
-                set(Calendar.MILLISECOND, 0)
-            }.timeInMillis
+            // Snap to the next clean interval boundary.
+            // e.g. interval=5 at 3:07 → fires at 3:10; interval=30 at 3:31 → fires at 4:00
+            val intervalMs = getInterval(context) * 60_000L
+            val nowMs = System.currentTimeMillis()
+            val nextFire = ((nowMs / intervalMs) + 1) * intervalMs
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarmManager.canScheduleExactAlarms()) {
-                // Fallback: inexact — still fires within a couple minutes
-                alarmManager.set(AlarmManager.RTC, nextMinute, pendingIntent)
+                alarmManager.set(AlarmManager.RTC, nextFire, pendingIntent)
             } else {
-                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC, nextMinute, pendingIntent)
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC, nextFire, pendingIntent)
             }
         }
 
