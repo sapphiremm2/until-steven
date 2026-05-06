@@ -146,18 +146,17 @@ class CountdownWidget : AppWidgetProvider() {
             // Apply theme
             applyTheme(context, views)
 
-            views.setTextViewText(R.id.tv_label, getLabel(context))
-
             // Minutes column visible unless interval is 60 min
             val showMinutes = intervalMinutes < 60
-            views.setViewVisibility(R.id.minutes_col,   if (showMinutes) View.VISIBLE else View.GONE)
-            views.setViewVisibility(R.id.separator_hm,  if (showMinutes) View.VISIBLE else View.GONE)
+            views.setViewVisibility(R.id.minutes_col,  if (showMinutes) View.VISIBLE else View.GONE)
+            views.setViewVisibility(R.id.separator_hm, if (showMinutes) View.VISIBLE else View.GONE)
 
             when (val target = getTarget(context, now)) {
                 null -> {
+                    // Event window — show logo, swap subtitle to now-label
                     views.setViewVisibility(R.id.countdown_container, View.GONE)
-                    views.setViewVisibility(R.id.now_container, View.VISIBLE)
-                    views.setTextViewText(R.id.tv_now_label, getNowLabel(context))
+                    views.setViewVisibility(R.id.iv_now_icon, View.VISIBLE)
+                    views.setTextViewText(R.id.tv_label, getNowLabel(context))
                 }
                 else -> {
                     val total   = Duration.between(now, target).toMinutes().coerceAtLeast(0)
@@ -166,7 +165,8 @@ class CountdownWidget : AppWidgetProvider() {
                     val minutes = total % 60
 
                     views.setViewVisibility(R.id.countdown_container, View.VISIBLE)
-                    views.setViewVisibility(R.id.now_container, View.GONE)
+                    views.setViewVisibility(R.id.iv_now_icon, View.GONE)
+                    views.setTextViewText(R.id.tv_label, getLabel(context))
                     views.setTextViewText(R.id.tv_days,    "%02d".format(days))
                     views.setTextViewText(R.id.tv_hours,   "%02d".format(hours))
                     views.setTextViewText(R.id.tv_minutes, "%02d".format(minutes))
@@ -183,20 +183,22 @@ class CountdownWidget : AppWidgetProvider() {
                     val dark = 0xFF111111.toInt()
                     val med  = 0x99111111.toInt()
                     val dim  = 0x55111111.toInt()
-                    views.setTextColor(R.id.tv_days,        dark)
-                    views.setTextColor(R.id.tv_hours,       dark)
-                    views.setTextColor(R.id.tv_minutes,     dark)
-                    views.setTextColor(R.id.tv_unit_days,   dim)
-                    views.setTextColor(R.id.tv_unit_hours,  dim)
-                    views.setTextColor(R.id.tv_unit_minutes,dim)
-                    views.setTextColor(R.id.tv_sep_1,       med)
-                    views.setTextColor(R.id.separator_hm,   med)
-                    views.setTextColor(R.id.tv_now_label,   dark)
-                    views.setTextColor(R.id.tv_label,       dim)
+                    views.setTextColor(R.id.tv_days,         dark)
+                    views.setTextColor(R.id.tv_hours,        dark)
+                    views.setTextColor(R.id.tv_minutes,      dark)
+                    views.setTextColor(R.id.tv_unit_days,    dim)
+                    views.setTextColor(R.id.tv_unit_hours,   dim)
+                    views.setTextColor(R.id.tv_unit_minutes, dim)
+                    views.setTextColor(R.id.tv_sep_1,        med)
+                    views.setTextColor(R.id.separator_hm,    med)
+                    views.setTextColor(R.id.tv_label,        dim)
+                    // Logo tinted dark on light background
+                    views.setInt(R.id.iv_now_icon, "setColorFilter", dark)
                 }
                 "clear" -> {
                     views.setInt(R.id.widget_root, "setBackgroundColor", Color.TRANSPARENT)
                     setWhiteTextColors(views)
+                    views.setInt(R.id.iv_now_icon, "setColorFilter", 0xFFFFFFFF.toInt())
                 }
                 "custom" -> {
                     val hue   = getCustomHue(ctx)
@@ -205,10 +207,12 @@ class CountdownWidget : AppWidgetProvider() {
                     val bg    = Color.HSVToColor(alpha, hsv)
                     views.setInt(R.id.widget_root, "setBackgroundColor", bg)
                     setWhiteTextColors(views)
+                    views.setInt(R.id.iv_now_icon, "setColorFilter", 0xFFFFFFFF.toInt())
                 }
                 else -> { // "dark" (default)
                     views.setInt(R.id.widget_root, "setBackgroundResource", R.drawable.widget_background)
                     setWhiteTextColors(views)
+                    views.setInt(R.id.iv_now_icon, "setColorFilter", 0xFFFFFFFF.toInt())
                 }
             }
         }
@@ -222,7 +226,6 @@ class CountdownWidget : AppWidgetProvider() {
             views.setTextColor(R.id.tv_unit_minutes, 0x55FFFFFF.toInt())
             views.setTextColor(R.id.tv_sep_1,        0x33FFFFFF.toInt())
             views.setTextColor(R.id.separator_hm,    0x33FFFFFF.toInt())
-            views.setTextColor(R.id.tv_now_label,    0xCCFFFFFF.toInt())
             views.setTextColor(R.id.tv_label,        0x33FFFFFF.toInt())
         }
 
